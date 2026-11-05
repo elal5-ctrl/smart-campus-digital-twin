@@ -1,0 +1,40 @@
+[project]
+name = "smart-campus-platform"
+version = "0.1.0"
+description = "Digital Smart Campus platform for Team A with API, data storage, data model, and extrapolation."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apscheduler>=3.11.2",
+    "fastapi[standard]>=0.136.1",
+    "geoalchemy2>=0.20.0",
+    "numpy>=2.4.6",
+    "paho-mqtt>=2.1.0",
+    "pandas>=2.3.3",
+    "psycopg[binary]>=3.3.4",
+    "pydantic-settings>=2.14.0",
+    "shapely>=2.1.2",
+    "sqlmodel>=0.0.38",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.12",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

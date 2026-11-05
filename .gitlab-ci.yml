@@ -1,0 +1,87 @@
+stages:
+  - lint
+  - test
+  - build
+
+default:
+  interruptible: true
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+  tags:
+    - docker
+    - linux
+
+variables:
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+  UV_LINK_MODE: copy
+
+backend:ruff:
+  stage: lint
+  image: ghcr.io/astral-sh/uv:python3.12-bookworm
+  before_script:
+    - cd backend
+    - uv sync --frozen
+  script:
+    - uv run ruff check .
+    - uv run ruff format . --check
+  cache:
+    key:
+      files:
+        - backend/uv.lock
+    paths:
+      - .uv-cache/
+      - backend/.venv/
+      - backend/.ruff_cache/
+
+backend:test:
+  stage: test
+  image: ghcr.io/astral-sh/uv:python3.12-bookworm
+  variables:
+    DATABASE_URL: "sqlite://"
+  before_script:
+    - cd backend
+    - uv sync --frozen
+  script:
+    - uv run python -m unittest discover -s tests -v
+  cache:
+    key:
+      files:
+        - backend/uv.lock
+    paths:
+      - .uv-cache/
+      - backend/.venv/
+
+frontend:lint:
+  stage: lint
+  image:
+    name: mirror.gcr.io/library/node:22-bookworm
+  before_script:
+    - cd frontend
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - npm run lint
+    - npm run format:check
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - frontend/.npm/
+
+frontend:build:
+  stage: build
+  image:
+    name: mirror.gcr.io/library/node:22-bookworm
+  before_script:
+    - cd frontend
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - npm run build
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - frontend/.npm/
